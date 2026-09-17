@@ -1,0 +1,10 @@
+node_modules/
+
+# Written by the widget at runtime
+.widget-state.json
+
+# Local run output
+run.log
+run.err
+widget-error.log
+*.png

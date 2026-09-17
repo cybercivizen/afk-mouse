@@ -1,0 +1,20 @@
+{
+  "name": "cache-warmer",
+  "version": "1.0.0",
+  "description": "Small desktop widget that keeps hot cache slots warm so entries don't expire.",
+  "type": "commonjs",
+  "bin": {
+    "cache-warmer": "cache-warmer.js"
+  },
+  "scripts": {
+    "start": "node cache-warmer.js",
+    "cli": "node cache-warmer.js --cli"
+  },
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.6",
+    "uiohook-napi": "^1.5.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
