@@ -1,20 +1,14 @@
 #!/usr/bin/env node
-// cache-warmer.js — keeps hot cache slots warm so entries don't expire (Node 22+)
+// cache-warmer.js — the plain-Node entry point (Node 22+).
 //
-// Setup:   npm install
-// Run:     double-click cache-warmer.vbs     (widget, no console window)
-//          node cache-warmer.js              (widget, console attached)
-//          node cache-warmer.js --cli        (terminal only, no widget)
+// The panel is an Electron window now, so it starts through Electron:
 //
-// The widget is hidden from screen shares and screenshots by default, and
-// lives in the tray rather than the taskbar. --show-in-capture makes it
-// visible to capture for one run; Ctrl+Alt+H is the setting that sticks.
+//   npm start                      widget (Electron)
+//   node cache-warmer.js --cli     terminal only, no Electron needed
 //
-// Hotkeys: Ctrl+Alt+P  pause / resume
-//          Ctrl+Alt+T  keep the widget above other windows / release it
-//          Ctrl+Alt+H  hide the widget from screen shares / show it again
-//          Ctrl+Alt+E  expand the panel / collapse it back to compact
-//          Ctrl+Alt+Q  quit   (Ctrl+C in the terminal works too)
+// Keeping the terminal front end reachable from bare Node is deliberate: it
+// is the original front end, it needs no Chromium, and it still works on any
+// platform the two native modules build for.
 
 'use strict';
 
@@ -22,13 +16,14 @@ const args = process.argv.slice(2);
 
 if (args.includes('-h') || args.includes('--help')) {
   console.log([
-    'cache-warmer — keeps hot cache slots warm so entries don\'t expire',
+    'cache-warmer — keeps hot cache slots warm so entries do not expire',
     '',
-    '  node cache-warmer.js          small on-screen widget (default)',
+    '  npm start                     small on-screen widget (Electron)',
     '  node cache-warmer.js --cli    terminal only',
     '',
-    '  --show-in-capture             let the widget appear in screen shares',
-    '                                (it is hidden from them by default)',
+    '  Widget-only flags, passed through Electron:',
+    '  npm start -- --show-in-capture   let the widget appear in screen shares',
+    '                                   (it is hidden from them by default)',
     '',
     '  Ctrl+Alt+P  pause / resume',
     '  Ctrl+Alt+T  pin the widget above other windows',
@@ -44,5 +39,7 @@ if (args.includes('-h') || args.includes('--help')) {
 if (args.includes('--cli') || args.includes('-c')) {
   require('./cli.js');
 } else {
-  require('./widget.js');
+  console.error('The widget runs under Electron now: use `npm start`.');
+  console.error('For the terminal front end: node cache-warmer.js --cli');
+  process.exit(1);
 }

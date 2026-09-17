@@ -1,20 +1,81 @@
 {
   "name": "cache-warmer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Small desktop widget that keeps hot cache slots warm so entries don't expire.",
   "type": "commonjs",
-  "bin": {
-    "cache-warmer": "cache-warmer.js"
-  },
+  "main": "main.js",
   "scripts": {
-    "start": "node cache-warmer.js",
-    "cli": "node cache-warmer.js --cli"
+    "start": "electron .",
+    "dev": "electron . --show-in-capture",
+    "cli": "node cache-warmer.js --cli",
+    "rebuild": "electron-rebuild -f",
+    "pack": "npm run icon && electron-builder --dir",
+    "dist": "npm run icon && electron-builder",
+    "icon": "node scripts/make-icon.js"
   },
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",
     "uiohook-napi": "^1.5.4"
   },
+  "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
+    "electron": "^44.4.1",
+    "electron-builder": "^26.15.3"
+  },
   "engines": {
     "node": ">=22"
+  },
+  "build": {
+    "appId": "com.cachewarmer.app",
+    "productName": "Cache Warmer",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "engine.js",
+      "cli.js",
+      "tray-icon.js",
+      "renderer/**"
+    ],
+    "asarUnpack": [
+      "**/*.node",
+      "**/node_modules/uiohook-napi/**",
+      "**/node_modules/@nut-tree-fork/**"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cache Warmer"
+    },
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "appx": {
+      "applicationId": "CacheWarmer",
+      "identityName": "CacheWarmer",
+      "publisher": "CN=REPLACE-ME",
+      "publisherDisplayName": "REPLACE-ME"
+    }
   }
 }

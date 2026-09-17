@@ -8,3 +8,9 @@ run.log
 run.err
 widget-error.log
 *.png
+
+# Packaged output
+dist/
+
+# Generated at build time
+build/icon.ico

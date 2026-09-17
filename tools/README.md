@@ -1,5 +1,9 @@
 # tools
 
+> **Retired.** These harnesses drive `widget.ps1`, the WinForms panel that the
+> Electron port replaced. They are kept for reference only and do not work
+> against the current build; use DevTools instead.
+
 Manual harnesses for working on the panel. None of this ships or runs in CI;
 it exists so UI changes can be looked at rather than guessed at.
 

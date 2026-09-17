@@ -1,0 +1,274 @@
+/* app.css — the panel's face.
+ *
+ * Every coordinate here is the number Apply-Layout used to pass to
+ * SetBounds, so the two builds lay out identically. Point sizes became
+ * pixels at the 96-DPI ratio the old fonts were measured at (pt x 4/3):
+ *   9.5pt semibold -> 12.667px   27pt -> 36px   13.5pt -> 18px
+ *   7.5pt          -> 10px       8pt  -> 10.667px   11pt -> 14.667px
+ */
+
+:root {
+  --bg:    #17181c;
+  --edge:  #30333a;
+  --rule:  #26282e;
+  --text:  #e9ebf0;
+  --dim:   #7e838e;
+  --faint: #5c606a;
+  --on:    #4ade80;
+  --hold:  #fbbf24;
+  --off:   #6e727c;
+  --hot:   #f87171;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The panel paints its own 1px border. An inset shadow rather than a real
+ * border, so the child coordinates keep their origin at 0,0 the way the
+ * WinForms client area did. 8px is what DWMWCP_ROUND gave on Windows 11. */
+#panel {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--edge);
+  overflow: hidden;
+}
+
+#panel > div,
+.keys > div,
+.acts > div {
+  position: absolute;
+  display: flex;
+  white-space: nowrap;
+}
+
+.control { cursor: pointer; }
+.faint   { color: var(--faint); }
+
+svg { display: block; pointer-events: none; }
+
+/* ── The dot and the status word: both toggle the pause ── */
+#dot {
+  width: 12px;
+  height: 18px;
+  font-size: 10.667px;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--on);
+}
+#panel.compact  #dot { left: 9px;  top: 10px; }
+#panel.expanded #dot { left: 12px; top: 10px; }
+
+#stat {
+  left: 26px;
+  top: 9px;
+  width: 56px;
+  height: 18px;
+  font-size: 12.667px;
+  font-weight: 600;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--text);
+}
+
+/* ── The countdown. Compact keeps it small and left-aligned; 47px is what the
+ *    longest countdown needs, since a backed-off wait reaches 150s. ── */
+#big { color: var(--text); }
+
+#panel.compact #big,
+#panel.animating #big {
+  left: 23px;
+  top: 7px;
+  width: 47px;
+  height: 24px;
+  font-size: 18px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#panel.expanded:not(.animating) #big {
+  left: 0;
+  top: 28px;
+  width: 100%;
+  height: 44px;
+  font-size: 36px;
+  align-items: center;
+  justify-content: center;
+}
+
+#cap {
+  left: 0;
+  top: 74px;
+  width: 100%;
+  height: 14px;
+  font-size: 10px;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+}
+
+/* The four expanded controls share one row: 22x22 boxes butted together on a
+ * 22px pitch, so no two hit-boxes overlap and all four sit on one centre line.
+ *
+ * That centre line is y=19, where the dot, the countdown and the compact state
+ * icons already are. The chevron was the only one of these on 19 while the
+ * close cross sat on 16 — a 3px step that was invisible with two items and
+ * obvious with four.
+ *
+ *   x:  100 chevron | 122 to-tray | 144 minimize | 166 close
+ */
+#panel.expanded #chev,
+#to-tray,
+#minimize,
+#close {
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+}
+
+#to-tray  { left: 122px; }
+#minimize { left: 144px; }
+#close    { left: 166px; }
+
+#to-tray g,
+#minimize path       { stroke: var(--faint); }
+#to-tray:hover g,
+#minimize:hover path { stroke: var(--text); }
+
+#close {
+  font-size: 14.667px;
+  color: var(--faint);
+}
+#close:hover { color: var(--hot); }
+
+/* ── Glyphs ── */
+/* The chevron stroke is the same size in both layouts; only its box and
+ * centre move. Compact keeps the 16px box the old panel used; expanded gets a
+ * 22px one so it lines up with the three buttons beside it. */
+#chev {
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+}
+#panel.compact  #chev { left: 105px; top: 11px; }
+#panel.expanded #chev { left: 100px; }
+#chev-path      { stroke: var(--faint); }
+#chev:hover #chev-path { stroke: var(--text); }
+
+.state-ico {
+  width: 12px;
+  height: 12px;
+  top: 13px;
+  align-items: center;
+  justify-content: center;
+}
+/* The two state icons belong to the countdown, so they sit tight against it
+ * and against each other, with the gap saved for the chevron. */
+#ico-pin { left: 72px; }
+#ico-eye { left: 86px; }
+
+#ico-pin svg g { stroke: var(--faint); }
+#panel.pinned #ico-pin svg g { stroke: var(--on); }
+
+/* Struck through and green while out of screen shares: that is the state
+ * doing its job. Left open and amber when it is not, because a panel a screen
+ * share can see is the one worth noticing. */
+#ico-eye svg g,
+#ico-eye #eye-slash { stroke: var(--hold); }
+#ico-eye circle     { fill: var(--hold); }
+#eye-gap            { stroke: var(--bg); }
+
+#panel.cap-hidden #ico-eye svg g,
+#panel.cap-hidden #ico-eye #eye-slash { stroke: var(--on); }
+#panel.cap-hidden #ico-eye circle     { fill: var(--on); }
+
+/* No strike at all while the panel is visible to capture. */
+#panel:not(.cap-hidden) #eye-gap,
+#panel:not(.cap-hidden) #eye-slash { display: none; }
+
+/* ── The divider and the shortcut list ── */
+#rule {
+  left: 16px;
+  top: 92px;
+  width: 163px;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* The two columns span the panel so their rows can be placed by top alone.
+ * They must not intercept anything, or dragging the background would stop
+ * working the moment the panel opened. */
+#panel > .keys,
+#panel > .acts {
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.key, .act {
+  height: 14px;
+  font-size: 10px;
+  align-items: flex-start;
+  line-height: 1.15;
+  pointer-events: auto;
+}
+
+/* ROW_Y 100, ROW_H 14 — four rows, both columns in step. */
+.key:nth-child(1), .act:nth-child(1) { top: 100px; }
+.key:nth-child(2), .act:nth-child(2) { top: 114px; }
+.key:nth-child(3), .act:nth-child(3) { top: 128px; }
+.key:nth-child(4), .act:nth-child(4) { top: 142px; }
+
+.key {
+  left: 16px;
+  width: 64px;
+  color: var(--dim);
+}
+
+.act {
+  left: 84px;
+  width: 96px;
+  justify-content: flex-start;
+  color: var(--faint);
+}
+
+/* 4px either side of the slash, which is the gap the measured layout left. */
+#act-slash  { margin: 0 4px; color: var(--faint); }
+#act-pause  { color: var(--on); }
+#act-resume { color: var(--faint); }
+#act-top    { color: var(--faint); }
+#act-hide   { color: var(--faint); }
+
+#panel.paused     #act-pause  { color: var(--faint); }
+#panel.paused     #act-resume { color: var(--on); }
+#panel.pinned     #act-top    { color: var(--on); }
+#panel.cap-hidden #act-hide   { color: var(--on); }
+
+/* ── Which half of the panel is on screen ── */
+#panel.compact  .panel-only { display: none; }
+#panel.expanded .state-ico  { display: none; }
+
+/* Nothing but the dot and the countdown survives the in-between sizes. The
+ * labels were clipped at those widths in WinForms, so they were revealed on
+ * the final frame instead. Electron does not clip, so if you would rather
+ * they faded in, drop this rule and give .panel-only a transition. */
+#panel.animating .panel-only,
+#panel.animating .state-ico { display: none; }
